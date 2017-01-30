@@ -1,0 +1,163 @@
+<html>
+  <head>
+    <title>myc</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pikaday/1.5.1/css/pikaday.css">
+  <script type="text/javascript" src="main.bundle.js"></script></head>
+  <body>
+    <div id="view"></div>
+
+    <script>
+			var from = new Date();
+			var to = new Date();
+			to.setDate( to.getDate() + 7*3);
+      slicer({
+        // the document object to use
+        document: document,
+        log: console.log,
+        // allows to specify the XHR library to use
+        xhr: XMLTestRequest,
+        // the dom element to inject the calendar view into
+        container: document.getElementById("view"),
+        // the endpoint where the timeslices can be found
+        endpoint: "/api",
+        // the library will request for slides in between from and to Dates
+        from: from,
+        to: to,
+        // allows to configure the key name in which the data is packed
+        rootKeyName: "myDummySchedule",
+        // allows to customize the primary color
+        color: "#ee8",
+        // some configurable labels
+        labels: {
+          title: "calendar",
+          from: "from",
+          to:   "to",
+          submit: "find time slices",
+          buttonPrev: "<<",
+          buttonNext: ">>",
+          monthLitterals: ["Januar", "Februar", "Marts", "April", 
+        "Maj", "Juni", "Juli", "August", "September", "Oktober", "November", "December"]
+        },
+        // allows to hide the title above the form
+        hideTitle: false,
+        // the callback function to call when a time slot is clicked
+        onSelectSlot: function (selectedSlot) {
+          alert("you have select the following time slot: " + new Date(selectedSlot).toISOString());
+        }
+          //formatTime: formatTime,
+          //formatDate: formatDate
+      })
+      function formatTime (date) {
+        // define formating rule here
+        return date;
+      }
+      function formatDate (date) {
+        // define formating rule here
+        return date;
+      }
+
+      function XMLTestRequest () {
+        this.readyState = 0;
+        this.status = 0;
+        this.onreadystatechange;
+        this.responseText;
+        this.open = function(method, path, async) {
+          var params = getJsonFromUrl(path);
+          this.responseText = JSON.stringify({
+            myDummySchedule: generateDates(params.from, params.to)
+          });
+          this.readyState = 4;
+          this.status = 200;
+          this.onreadystatechange();
+        }
+        this.send = function () {
+        }
+      }
+
+      function generateDates (from, to) {
+        console.log("generate dates from: ", from, " to: ", to);
+        from = new Date(from);
+        to = new Date(to);
+        var timeslices = {}
+
+        day = {
+          from: null,
+          to: null
+        }
+
+        lunch = {
+          from: new Date(),
+          to: new Date()
+        };
+
+        lunch.from.setHours(12);
+        lunch.from.setMinutes(0);
+
+        lunch.to.setHours(14);
+        lunch.to.setMinutes(0);
+
+        var sliceLength = 20;
+
+        while(from < to) {
+          var rnd = Math.random();
+          if(rnd <= 0.4) { // 40 percent chances
+            var arr = [];
+            timeslices[from] = arr;
+
+            day.from = new Date();
+            day.from.setHours(8);
+            day.from.setMinutes(0);
+            day.from.setSeconds(0);
+            day.to = new Date();
+            day.to.setHours(16);
+            day.to.setMinutes(0);
+            day.to.setSeconds(0);
+            while(day.from < day.to) {
+              if(Math.random() <= 0.7) {// 50 percent chances
+                var sliceEnd = new Date(day.from);
+                sliceEnd.setMinutes(sliceEnd.getMinutes() + sliceLength);
+                sliceEnd = new Date(sliceEnd);
+                if(day.from < lunch.from || day.from > lunch.to)
+                  arr.push({from: new Date(day.from), to: sliceEnd});
+              }
+              var newHour = day.from.setMinutes(day.from.getMinutes() + sliceLength);
+              day.from = new Date(newHour);
+            }
+          }
+          var newDate = from.setDate(from.getDate() + 1);
+          from = new Date(newDate);
+        }
+
+        return timeslices;
+      }
+      /* utils ***********************************/
+      function getJsonFromUrl(url) {
+        var query;
+
+        var pos = url.indexOf("?");
+        if(pos==-1) return [];
+        query = url.substr(pos+1);
+        
+        var result = {};
+        query.split("&").forEach(function(part) {
+          if(!part) return;
+          part = part.split("+").join(" "); // replace every + with space, regexp-free version
+          var eq = part.indexOf("=");
+          var key = eq>-1 ? part.substr(0,eq) : part;
+          var val = eq>-1 ? decodeURIComponent(part.substr(eq+1)) : "";
+          var from = key.indexOf("[");
+          if(from==-1) result[decodeURIComponent(key)] = val;
+          else {
+            var to = key.indexOf("]");
+            var index = decodeURIComponent(key.substring(from+1,to));
+            key = decodeURIComponent(key.substring(0,from));
+            if(!result[key]) result[key] = [];
+            if(!index) result[key].push(val);
+            else result[key][index] = val;
+          }
+        });
+        return result;
+      }
+    </script>
+  </body>
+</html>

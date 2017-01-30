@@ -1,0 +1,30 @@
+{
+  "name": "myc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "express": "node backend",
+    "server": "webpack-dev-server --config config/webpack.js --progress --watch --content-base src",
+    "start": "npm run express",
+    "build": "webpack --config config/webpack.js --progress",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "body-parser": "^1.16.0",
+    "copy-webpack-plugin": "^4.0.1",
+    "express": "^4.14.0",
+    "gh-pages": "^0.12.0",
+    "html-webpack-plugin": "^2.26.0",
+    "webpack": "^1.14.0",
+    "webpack-dev-middleware": "^1.9.0",
+    "webpack-dev-server": "^1.16.2",
+    "webpack-hot-middleware": "^2.15.0",
+    "webpack-merge": "^2.6.1"
+  },
+  "dependencies": {
+    "pikaday": "^1.5.1"
+  }
+}
